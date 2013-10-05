@@ -1,6 +1,8 @@
 import sys
 from os.path import join, abspath, dirname
 
+import django.conf.global_settings as DEFAULT_SETTINGS
+
 # PATH vars
 
 here = lambda *x: join(abspath(dirname(__file__)), *x)
@@ -42,7 +44,7 @@ TIME_ZONE = 'Europe/London'
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-gb'
 
-SITE_ID = 1
+SITE_ID = 2
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
@@ -111,6 +113,7 @@ WSGI_APPLICATION = 'django-memento.wsgi.application'
 
 TEMPLATE_DIRS = (
     root('templates'),
+    root('templates/aullauth/')
 )
 
 INSTALLED_APPS = (
@@ -121,12 +124,42 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+
     'south',
+
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.facebook'
 )
 
-PROJECT_APPS = ()
+PROJECT_APPS = ( 'memento', )
 
-INSTALLED_APPS += PROJECT_APPS
+INSTALLED_APPS += PROJECT_APPS 
+
+
+SOCIALACCOUNT_PROVIDERS = {
+    'facebook': { 
+        'SCOPE': ['email'],
+        'AUTH_PARAMS': { 'auth_type': 'https' },
+        'METHOD': 'js_sdk' ,
+        'LOCALE_FUNC': lambda request: 'en_US',
+    },
+}
+
+
+TEMPLATE_CONTEXT_PROCESSORS = DEFAULT_SETTINGS.TEMPLATE_CONTEXT_PROCESSORS + (
+    "django.core.context_processors.request",
+    "allauth.account.context_processors.account",
+    "allauth.socialaccount.context_processors.socialaccount",
+)
+
+AUTHENTICATION_BACKENDS = DEFAULT_SETTINGS.AUTHENTICATION_BACKENDS + (
+    "django.contrib.auth.backends.ModelBackend",
+    #allauth authentication methods (i.e. login by e-mail)
+    "allauth.account.auth_backends.AuthenticationBackend",
+)
+
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
